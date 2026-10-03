@@ -4,6 +4,7 @@ All notable project changes are tracked here.
 
 ## Unreleased
 
+- Added right-side modifier hotkeys on macOS: `push_to_talk = "RightCtrl"` (also `RightCmd`, `RightOption`, `RightShift`) now triggers only on the physical right-hand key, since CGEventTap can tell the sides apart. Linux providers cannot distinguish sides yet, so these names stay unsupported there.
 - Add a responsive Chinese project introduction website with a simulated recording and R-triggered retry demo, platform-specific launch commands, static HTTP preview on port 7788, and automated GitHub Pages deployment linked from both READMEs.
 
 ## v0.0.3 - 2026-07-29

@@ -131,6 +131,12 @@ var modifierNames = map[string]hotkey.Modifier{
 	"ctrl": hotkey.ModCtrl, "alt": hotkey.ModAlt, "shift": hotkey.ModShift,
 	"control": hotkey.ModCtrl, "option": hotkey.ModAlt, "super": hotkey.ModSuper,
 	"cmd": hotkey.ModSuper, "command": hotkey.ModSuper, "win": hotkey.ModSuper,
+	"rctrl": hotkey.ModRCtrl, "rightctrl": hotkey.ModRCtrl, "right ctrl": hotkey.ModRCtrl,
+	"ralt": hotkey.ModRAlt, "rightalt": hotkey.ModRAlt, "right alt": hotkey.ModRAlt,
+	"rightoption": hotkey.ModRAlt, "right option": hotkey.ModRAlt,
+	"rshift": hotkey.ModRShift, "rightshift": hotkey.ModRShift, "right shift": hotkey.ModRShift,
+	"rsuper": hotkey.ModRSuper, "rightsuper": hotkey.ModRSuper, "right super": hotkey.ModRSuper,
+	"rcmd": hotkey.ModRSuper, "rightcmd": hotkey.ModRSuper, "right cmd": hotkey.ModRSuper,
 }
 
 var keyNameToCode = buildKeyNameMap()
@@ -154,6 +160,23 @@ func buildKeyNameMap() map[string]hotkey.KeyCode {
 	m["option"] = hotkey.KeyAlt
 	m["shift"] = hotkey.KeyShift
 	m["super"] = hotkey.KeySuper
+	m["rctrl"] = hotkey.KeyRCtrl
+	m["rightctrl"] = hotkey.KeyRCtrl
+	m["right ctrl"] = hotkey.KeyRCtrl
+	m["ralt"] = hotkey.KeyRAlt
+	m["rightalt"] = hotkey.KeyRAlt
+	m["right alt"] = hotkey.KeyRAlt
+	m["rightoption"] = hotkey.KeyRAlt
+	m["right option"] = hotkey.KeyRAlt
+	m["rshift"] = hotkey.KeyRShift
+	m["rightshift"] = hotkey.KeyRShift
+	m["right shift"] = hotkey.KeyRShift
+	m["rsuper"] = hotkey.KeyRSuper
+	m["rightsuper"] = hotkey.KeyRSuper
+	m["right super"] = hotkey.KeyRSuper
+	m["rcmd"] = hotkey.KeyRSuper
+	m["rightcmd"] = hotkey.KeyRSuper
+	m["right cmd"] = hotkey.KeyRSuper
 	m["cmd"] = hotkey.KeySuper
 	m["command"] = hotkey.KeySuper
 	m["win"] = hotkey.KeySuper

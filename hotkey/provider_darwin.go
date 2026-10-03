@@ -119,7 +119,7 @@ var darwinKeyToUnified = map[uint16]KeyCode{
 	0x17: Key5, 0x16: Key6, 0x1A: Key7, 0x1C: Key8, 0x19: Key9,
 
 	0x3B: KeyCtrl, 0x3A: KeyAlt, 0x38: KeyShift, 0x37: KeySuper,
-	0x3E: KeyCtrl, 0x3D: KeyAlt, 0x3C: KeyShift, 0x36: KeySuper,
+	0x3E: KeyRCtrl, 0x3D: KeyRAlt, 0x3C: KeyRShift, 0x36: KeyRSuper,
 
 	0x7A: KeyF1, 0x78: KeyF2, 0x63: KeyF3, 0x76: KeyF4,
 	0x60: KeyF5, 0x61: KeyF6, 0x62: KeyF7, 0x64: KeyF8,
@@ -410,15 +410,29 @@ func (p *darwinProvider) handleCGEvent() {
 func (p *darwinProvider) processFlagsChanged(key KeyCode, mods Modifier, now time.Time) []Event {
 	var events []Event
 	if key != KeyNone {
-		// Keep the generic tracker state current for regular modifier+key combos.
-		if mods&KeyCodeToModifier(key) != 0 {
-			events = append(events, p.tracker.KeyDown(key, now)...)
+		if key.IsModifier() {
+			// A flagsChanged event carries the keycode of the physical key that
+			// changed. If that key is already believed held, this event must be
+			// its release — the modifier flag may still be set because the other
+			// side of the same modifier (e.g. left Ctrl) remains held. Flag-only
+			// detection cannot tell the sides apart, so the prior key state is
+			// the source of truth for the direction.
+			if p.tracker.IsPressed(key) {
+				events = append(events, p.tracker.KeyUp(key, now)...)
+			} else if mods&baseModifiers(KeyCodeToModifier(key)) != 0 {
+				events = append(events, p.tracker.KeyDown(key, now)...)
+			}
 		} else {
-			events = append(events, p.tracker.KeyUp(key, now)...)
+			// Keep the generic tracker state current for regular modifier+key combos.
+			if mods&KeyCodeToModifier(key) != 0 {
+				events = append(events, p.tracker.KeyDown(key, now)...)
+			} else {
+				events = append(events, p.tracker.KeyUp(key, now)...)
+			}
 		}
 	}
 	for combo, active := range p.activeModifierCombos {
-		nowActive := mods&combo.Mods == combo.Mods
+		nowActive := p.modifierComboActive(combo, mods)
 		switch {
 		case nowActive && !active:
 			p.activeModifierCombos[combo] = true
@@ -429,6 +443,40 @@ func (p *darwinProvider) processFlagsChanged(key KeyCode, mods Modifier, now tim
 		}
 	}
 	return events
+}
+
+// modifierComboActive reports whether a modifier-only combo is currently
+// triggered. Side-specific bits match against the physical right-hand key
+// state (via the tracker); the remaining bits match against event flags.
+func (p *darwinProvider) modifierComboActive(combo Combo, mods Modifier) bool {
+	side := combo.Mods & modSideMask
+	if side == 0 {
+		return mods&combo.Mods == combo.Mods
+	}
+	if !p.sideKeysHeld(side) {
+		return false
+	}
+	rest := combo.Mods &^ modSideMask
+	return mods&rest == rest
+}
+
+// sideKeysHeld reports whether every side-specific modifier in the mask
+// refers to a physically held key.
+func (p *darwinProvider) sideKeysHeld(side Modifier) bool {
+	for _, sk := range []struct {
+		mod Modifier
+		key KeyCode
+	}{
+		{ModRCtrl, KeyRCtrl},
+		{ModRAlt, KeyRAlt},
+		{ModRShift, KeyRShift},
+		{ModRSuper, KeyRSuper},
+	} {
+		if side&sk.mod != 0 && !p.tracker.IsPressed(sk.key) {
+			return false
+		}
+	}
+	return true
 }
 
 // ---- Key code conversion ----

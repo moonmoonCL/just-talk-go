@@ -114,9 +114,11 @@ func (t *KeyStateTracker) KeyDown(key KeyCode, now time.Time) []Event {
 	// Track key state
 	t.pressed[key] = keyState{pressed: true, pressedAt: now}
 
-	// Track modifiers
+	// Track modifiers. activeMods is side-agnostic: a right-side key
+	// contributes the same bit as its left counterpart, so standard
+	// modifier+key combos work with either side.
 	if mod := KeyCodeToModifier(key); mod != ModNone {
-		t.activeMods |= mod
+		t.activeMods |= baseModifiers(mod)
 	}
 
 	// Track last non-modifier key
@@ -177,9 +179,21 @@ func (t *KeyStateTracker) KeyUp(key KeyCode, now time.Time) []Event {
 	// Track key state
 	delete(t.pressed, key)
 
-	// Track modifiers
+	// Track modifiers. The other side of the same modifier (e.g. left Ctrl
+	// when right Ctrl is released) may still be held, so only clear the bit
+	// once no remaining pressed key maps to the same base modifier.
 	if mod := KeyCodeToModifier(key); mod != ModNone {
-		t.activeMods &^= mod
+		base := baseModifiers(mod)
+		stillHeld := false
+		for k := range t.pressed {
+			if kMod := KeyCodeToModifier(k); kMod != ModNone && baseModifiers(kMod) == base {
+				stillHeld = true
+				break
+			}
+		}
+		if !stillHeld {
+			t.activeMods &^= base
+		}
 	}
 
 	// Fire KeyUp for active standard combos as soon as any member of the

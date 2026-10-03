@@ -17,11 +17,44 @@ type Modifier uint32
 
 const (
 	ModNone  Modifier = 0
-	ModCtrl  Modifier = 1 << iota // 1
-	ModAlt                        // 2
-	ModShift                      // 4
-	ModSuper                      // 8 (Win / Cmd)
+	ModCtrl  Modifier = 1 << iota // 2
+	ModAlt                        // 4
+	ModShift                      // 8
+	ModSuper                      // 16 (Win / Cmd)
 )
+
+// Side-specific modifier bits, continuing after ModSuper. They identify the
+// physical right-hand keys and are only produced by providers that can tell
+// the sides apart (currently the macOS CGEventTap provider). A combo that
+// carries a side bit matches only while that physical key is held.
+const (
+	ModRCtrl  Modifier = 1 << (iota + 5) // 32
+	ModRAlt                              // 64
+	ModRShift                            // 128
+	ModRSuper                            // 256
+)
+
+// modSideMask covers all side-specific modifier bits.
+const modSideMask = ModRCtrl | ModRAlt | ModRShift | ModRSuper
+
+// baseModifiers maps side-specific bits onto their side-agnostic
+// counterparts (ModRCtrl → ModCtrl, ...) and leaves other bits untouched.
+func baseModifiers(m Modifier) Modifier {
+	base := m &^ modSideMask
+	if m&ModRCtrl != 0 {
+		base |= ModCtrl
+	}
+	if m&ModRAlt != 0 {
+		base |= ModAlt
+	}
+	if m&ModRShift != 0 {
+		base |= ModShift
+	}
+	if m&ModRSuper != 0 {
+		base |= ModSuper
+	}
+	return base
+}
 
 // String returns a human-readable representation of the modifier mask.
 func (m Modifier) String() string {
@@ -40,6 +73,18 @@ func (m Modifier) String() string {
 	}
 	if m&ModSuper != 0 {
 		s += "Super+"
+	}
+	if m&ModRCtrl != 0 {
+		s += "RightCtrl+"
+	}
+	if m&ModRAlt != 0 {
+		s += "RightAlt+"
+	}
+	if m&ModRShift != 0 {
+		s += "RightShift+"
+	}
+	if m&ModRSuper != 0 {
+		s += "RightSuper+"
 	}
 	if s != "" {
 		s = s[:len(s)-1] // trim trailing "+"
@@ -88,9 +133,9 @@ func (c Combo) String() string {
 type EventType int
 
 const (
-	KeyDown   EventType = iota // Key pressed down
-	KeyUp                      // Key released
-	KeyPress                   // Key pressed and quickly released (simulates a "click")
+	KeyDown  EventType = iota // Key pressed down
+	KeyUp                     // Key released
+	KeyPress                  // Key pressed and quickly released (simulates a "click")
 )
 
 // String returns a human-readable event type name.
