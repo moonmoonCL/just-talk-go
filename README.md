@@ -160,7 +160,7 @@ push_to_talk = "Alt+Super"
 
 语音热键只支持适合作为全局快捷键的按键：
 
-- 支持：纯修饰键组合，如 `Alt+Super`、`Ctrl+Alt+Shift`；macOS 上还支持右侧修饰键，如 `RightCtrl`、`RightOption`、`RightCmd`（左右可区分，Linux 上暂不支持）。
+- 支持：纯修饰键组合，如 `Alt+Super`、`Ctrl+Alt+Shift`；macOS 上还支持右侧修饰键，如 `RightOption`（即 PC 键盘的右 Alt）、`RightCmd`（注意 Apple 键盘没有右 Ctrl；左右可区分，Linux 上暂不支持）。
 - 支持：功能键 `F1` 到 `F24`，如 `F9`、`Alt+F8`。
 - 支持：非文本控制键和导航键，如 `Tab`、`Enter`、`Escape`、`Backspace`、`CapsLock`、`Up`、`Down`、`Left`、`Right`、`Home`、`End`、`PageUp`、`PageDown`、`Insert`、`Delete`。
 - 不支持：字母、数字、标点、空格、数字小键盘数字和符号等会输入文本的按键，如 `Alt+G`、`G`、`Alt+1`、`Alt+Space`。
@@ -180,11 +180,11 @@ macOS 热键写法：
 push_to_talk = "Option+Command"
 ```
 
-macOS 上也可以只按右侧修饰键触发，例如右 Ctrl：
+macOS 上也可以只按右侧修饰键触发，例如右 Option（PC 键盘上对应右 Alt）：
 
 ```toml
 [voice]
-push_to_talk = "RightCtrl"
+push_to_talk = "RightOption"
 ```
 
 Windows 使用 `Win` 或 `Super` 表示 Windows 徽标键。如果麦克风不可用，请在“Windows 设置 → 隐私和安全性 → 麦克风”中允许桌面应用访问麦克风。
